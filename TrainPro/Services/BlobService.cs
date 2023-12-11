@@ -40,7 +40,7 @@ namespace TrainPro.Services
             {
                 return await GetBlob(blobName, containerName);
             }
-            return "";
+            return " ";
         }
     }
 }
