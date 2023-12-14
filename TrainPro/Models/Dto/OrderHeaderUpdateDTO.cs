@@ -9,8 +9,6 @@ namespace TrainPro.Models.Dto
         public string PickUpName { get; set; }
         public string PickUpPhoneNumber { get; set; }
         public string PickUpEmail { get; set; }
-
-        public DateTime OrderDate { get; set; }
         public string StripePaymentIntentId { get; set; }
         public string Status { get; set; }
     }

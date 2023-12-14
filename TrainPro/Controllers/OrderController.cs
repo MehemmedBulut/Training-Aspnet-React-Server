@@ -132,5 +132,56 @@ namespace TrainPro.Controllers
             }
             return _response;
         }
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<ApiResponse>> UpdateOrderHeader(int id, [FromBody] OrderHeaderUpdateDTO orderHeaderUpdateDTO)
+        {
+            try
+            {
+                if(orderHeaderUpdateDTO == null || id!= orderHeaderUpdateDTO.OrderHeaderId)
+                {
+                    _response.IsSsuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest();
+                }
+                OrderHeader orderFromDb = _db.OrderHeaders.FirstOrDefault(u => u.OrderHeaderId == id);
+
+                if(orderFromDb == null)
+                {
+                    return BadRequest();
+                }
+                if (!string.IsNullOrEmpty(orderHeaderUpdateDTO.PickUpName))
+                {
+                    orderFromDb.PickUpName = orderHeaderUpdateDTO.PickUpName;
+                }
+                if (!string.IsNullOrEmpty(orderHeaderUpdateDTO.PickUpPhoneNumber))
+                {
+                    orderFromDb.PickUpPhoneNumber = orderHeaderUpdateDTO.PickUpPhoneNumber;
+                }
+                if (!string.IsNullOrEmpty(orderHeaderUpdateDTO.PickUpEmail))
+                {
+                    orderFromDb.PickUpEmail = orderHeaderUpdateDTO.PickUpEmail;
+                }
+                if (!string.IsNullOrEmpty(orderHeaderUpdateDTO.Status))
+                {
+                    orderFromDb.Status = orderHeaderUpdateDTO.Status;
+                }
+                if (!string.IsNullOrEmpty(orderHeaderUpdateDTO.StripePaymentIntentId))
+                {
+                    orderFromDb.StripePaymentIntentId = orderHeaderUpdateDTO.StripePaymentIntentId;
+                }
+                _db.SaveChanges();
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSsuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSsuccess = false;
+                _response.ErrorMessages
+                    = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
+
     }
 }
