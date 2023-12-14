@@ -18,6 +18,38 @@ namespace TrainPro.Controllers
             _db = db;
             _response = new();
         }
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse>> GetShoppingCart(string userId)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(userId))
+                {
+                    _response.IsSsuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+                ShoppingCart shoppingCart = _db.ShoppingCarts
+                    .Include(u=>u.CartItems).ThenInclude(u=>u.MenuItem)
+                    .FirstOrDefault(u=>u.UserId==userId);
+                if(shoppingCart.CartTotal != null && shoppingCart.CartItems.Count > 0)
+                {
+                    shoppingCart.CartTotal = shoppingCart.CartItems.Sum(u => u.Quantity * u.MenuItem.Price);
+                };
+                
+                _response.Result = shoppingCart;
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSsuccess = false;
+                _response.ErrorMessages
+                    = new List<string>() { ex.ToString() };
+                _response.StatusCode = HttpStatusCode.BadRequest;
+            }
+            return _response;
+        }
 
         [HttpPost]
         public async Task<ActionResult<ApiResponse>> AddOrUpdateItemInCart(string userId, int menuItemId, int updateQuantityBy)
@@ -55,7 +87,8 @@ namespace TrainPro.Controllers
                     {
                         MenuItemId = menuItemId,
                         Quantity = updateQuantityBy,
-                        ShoppingCartId = shoppingCart.Id
+                        ShoppingCartId = shoppingCart.Id,
+                        MenuItem = null
                     };
                     _db.CartItems.Add(newCartItem);
                     _db.SaveChanges();
